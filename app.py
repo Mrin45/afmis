@@ -224,19 +224,21 @@ import ee
 import os
 import json
 
-# Get JSON string from environment variable
-credentials_json = os.getenv("GEE_CREDENTIALS_JSON")
-if not credentials_json:
-    raise ValueError("GEE_CREDENTIALS_JSON environment variable not set.")
 
-# Write JSON to a temporary file
+# Store the credentials as an environment variable in Render (or locally)
+credentials_json = os.getenv("GEE_CREDENTIALS_JSON")
+
+# Save the credentials JSON to a temporary file
 credentials_path = "/tmp/credentials.json"
 with open(credentials_path, "w") as f:
     f.write(credentials_json)
 
-# Authenticate using ServiceAccountCredentials
-ee.Initialize(ee.ServiceAccountCredentials(None, credentials_path))
+# Initialize Earth Engine with the service account credentials
+credentials = ee.ServiceAccountCredentials(None, credentials_path)
+ee.Initialize(credentials)
+
 print("Earth Engine Initialized Successfully")
+
 
 
 
