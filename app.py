@@ -232,19 +232,15 @@ if not credentials_json:
 # Parse the JSON string into a dictionary
 credentials = json.loads(credentials_json)
 
-# Initialize Earth Engine
-ee.Initialize(
-    ee.ServiceAccountCredentials(
-        None,
-        json_key_dict={
-            "client_id": credentials["client_id"],
-            "client_secret": credentials["client_secret"],
-            "refresh_token": credentials["refresh_token"],
-        }
-    )
+# Use OAuth2Credentials with refresh token
+auth_token = ee.OAuth2Credentials(
+    client_id=credentials["client_id"],
+    client_secret=credentials["client_secret"],
+    refresh_token=credentials["refresh_token"]
 )
 
-
+# Initialize Earth Engine with the token
+ee.Initialize(auth_token)
 
 
 
