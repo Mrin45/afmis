@@ -225,6 +225,15 @@ import os
 import json
 
 
+# Get the port from the environment variable
+port = int(os.environ.get("PORT", 5000))
+
+# Run Flask app on the specified port
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=port)
+
+
+
 # Store the credentials as an environment variable in Render (or locally)
 credentials_json = os.getenv("GEE_CREDENTIALS_JSON")
 
