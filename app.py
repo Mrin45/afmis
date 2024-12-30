@@ -224,23 +224,20 @@ import ee
 import os
 import json
 
-# Retrieve credentials from environment variable
-credentials_json = os.getenv("GEE_CREDENTIALS")
+# Get JSON string from environment variable
+credentials_json = os.getenv("GEE_CREDENTIALS_JSON")
 if not credentials_json:
-    raise ValueError("GEE_CREDENTIALS environment variable not set.")
+    raise ValueError("GEE_CREDENTIALS_JSON environment variable not set.")
 
-# Parse the JSON string into a dictionary
-credentials = json.loads(credentials_json)
+# Write JSON to a temporary file
+credentials_path = "/tmp/credentials.json"
+with open(credentials_path, "w") as f:
+    f.write(credentials_json)
 
-# Use OAuth2Credentials with refresh token
-auth_token = ee.OAuth2Credentials(
-    client_id=credentials["client_id"],
-    client_secret=credentials["client_secret"],
-    refresh_token=credentials["refresh_token"]
-)
+# Authenticate using ServiceAccountCredentials
+ee.Initialize(ee.ServiceAccountCredentials(None, credentials_path))
+print("Earth Engine Initialized Successfully")
 
-# Initialize Earth Engine with the token
-ee.Initialize(auth_token)
 
 
 
