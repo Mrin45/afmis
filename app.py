@@ -222,13 +222,28 @@
 from flask import Flask, request, render_template, jsonify
 import ee
 import os
+import json
 
-# Initialize the Earth Engine API
-credentials_path = "/tmp/earthengine_credentials"
-with open(credentials_path, "w") as creds:
-    creds.write(os.environ["EARTHENGINE_CREDENTIALS"])
+# Retrieve credentials from environment variable
+credentials_json = os.getenv("GEE_CREDENTIALS")
+if not credentials_json:
+    raise ValueError("GEE_CREDENTIALS environment variable not set.")
 
-ee.Initialize(ee.Credentials(credentials_path))
+# Parse the JSON string into a dictionary
+credentials = json.loads(credentials_json)
+
+# Initialize Earth Engine
+ee.Initialize(
+    ee.ServiceAccountCredentials(
+        None,
+        json_key_dict={
+            "client_id": credentials["client_id"],
+            "client_secret": credentials["client_secret"],
+            "refresh_token": credentials["refresh_token"],
+        }
+    )
+)
+
 
 
 
