@@ -250,14 +250,14 @@ print("Earth Engine Initialized Successfully")
 # Initialize the Flask app
 app = Flask(__name__)
 
+
+# Get the port from the environment variable
+port = int(os.environ.get("PORT", 5000))
+
 # Define routes
 @app.route('/')
 def index():
     return render_template('index.html')
-
-# Get the port from the environment variable
-# port = int(os.environ.get("PORT", 5000))
-
 
 
 
