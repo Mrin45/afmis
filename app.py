@@ -225,13 +225,6 @@ import os
 import json
 
 
-# Get the port from the environment variable
-port = int(os.environ.get("PORT", 5000))
-
-# Run Flask app on the specified port
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=port)
-
 
 
 # Store the credentials as an environment variable in Render (or locally)
@@ -261,6 +254,15 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+# Get the port from the environment variable
+port = int(os.environ.get("PORT", 5000))
+
+# Run Flask app on the specified port
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=port)
+
+
 
 @app.route('/get-districts', methods=['GET'])
 def get_districts():
