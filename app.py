@@ -256,11 +256,8 @@ def index():
     return render_template('index.html')
 
 # Get the port from the environment variable
-port = int(os.environ.get("PORT", 5000))
+# port = int(os.environ.get("PORT", 5000))
 
-# Run Flask app on the specified port
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=port)
 
 
 
@@ -418,5 +415,6 @@ def get_flood_data():
         return jsonify({'error': f"Unexpected Error: {str(e)}"}), 500
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Run Flask app on the specified port
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=port, debug=True)
