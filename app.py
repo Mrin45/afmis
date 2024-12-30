@@ -268,7 +268,7 @@ if __name__ == "__main__":
 def get_districts():
     try:
         # Load ROI with district names
-        roi = ee.FeatureCollection('projects/ee-mrinmoynath/assets/Assam_Dist')
+        roi = ee.FeatureCollection('projects/fire-detection-429215/assets/Assam_Dist')
         # Extract district names
         district_names = roi.aggregate_array('NAME').getInfo()
         return jsonify({'districts': sorted(district_names)})
