@@ -324,13 +324,13 @@
                     }
 
                     // Create new layers
-                    const beforeFloodLayer = L.tileLayer(data.before_filtered_url, { attribution: 'Before Flood' });
-                    const afterFloodLayer = L.tileLayer(data.after_filtered_url, { attribution: 'After Flood' });
-                    const floodLayer = L.tileLayer(data.flood_tile_url, { attribution: 'Flood' });
-                    const waterLayer = L.tileLayer(data.water_tile_url, { attribution: 'Water' });
-                    const beforeFloodNDWI = L.tileLayer(data.ndwi_beforeflood_url, { attribution: 'NDWI Before' });
-                    const aferFloodNDWI = L.tileLayer(data.ndwi_afterflood_url, { attribution: 'NDWI After' });
-
+                    const beforeFloodLayer = L.tileLayer(data.before_filtered_url, { attribution: 'Before Flood', zIndex: 1000 });
+                    const afterFloodLayer = L.tileLayer(data.after_filtered_url, { attribution: 'After Flood', zIndex: 1000 });
+                    const floodLayer = L.tileLayer(data.flood_tile_url, { attribution: 'Flood', zIndex: 1000 });
+                    const waterLayer = L.tileLayer(data.water_tile_url, { attribution: 'Water', zIndex: 1000 });
+                    const beforeFloodNDWI = L.tileLayer(data.ndwi_beforeflood_url, { attribution: 'NDWI Before', zIndex: 1000 });
+                    const aferFloodNDWI = L.tileLayer(data.ndwi_afterflood_url, { attribution: 'NDWI After', zIndex: 1000 });
+                    
                     // Store layers in activeLayers
                     activeLayers['beforeFlood'] = beforeFloodLayer;
                     activeLayers['afterFlood'] = afterFloodLayer;
