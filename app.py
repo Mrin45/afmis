@@ -221,9 +221,19 @@
 
 from flask import Flask, request, render_template, jsonify
 import ee
+import os
 
 # Initialize the Earth Engine API
-ee.Initialize()
+credentials_path = "/tmp/earthengine_credentials"
+with open(credentials_path, "w") as creds:
+    creds.write(os.environ["EARTHENGINE_CREDENTIALS"])
+
+ee.Initialize(ee.Credentials(credentials_path))
+
+
+
+
+
 
 # Initialize the Flask app
 app = Flask(__name__)
