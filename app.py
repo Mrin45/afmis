@@ -447,6 +447,9 @@ print("Earth Engine Initialized Successfully")
 # Initialize the Flask app
 app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return "Welcome!"
 
 # Get the port from the environment variable
 # port = int(os.environ.get("PORT", 5000))
