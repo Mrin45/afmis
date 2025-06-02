@@ -457,8 +457,6 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
 
 @app.route('/get-districts', methods=['GET'])
 def get_districts():
@@ -676,6 +674,10 @@ def get_flood_data():
         return jsonify({'error': f"Earth Engine Error: {str(ee_error)}"}), 500
     except Exception as e:
         return jsonify({'error': f"Unexpected Error: {str(e)}"}), 500
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
 
 # if __name__ == '__main__':
 #     app.run(debug=True)
