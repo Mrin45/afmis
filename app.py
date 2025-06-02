@@ -675,10 +675,10 @@ def get_flood_data():
     except Exception as e:
         return jsonify({'error': f"Unexpected Error: {str(e)}"}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
 
 
-# Run Flask app on the specified port
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=port, debug=True)
+# # Run Flask app on the specified port
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=port, debug=True)
