@@ -418,12 +418,40 @@
 
 from flask import Flask, request, render_template, jsonify
 import ee
+import os
+import json
 
-# Initialize the Earth Engine API
-ee.Initialize()
+
+
+
+# Store the credentials as an environment variable in Render (or locally)
+credentials_json = os.getenv("GEE_CREDENTIALS_JSON")
+
+# Save the credentials JSON to a temporary file
+credentials_path = "/tmp/credentials.json"
+with open(credentials_path, "w") as f:
+    f.write(credentials_json)
+
+# Initialize Earth Engine with the service account credentials
+credentials = ee.ServiceAccountCredentials(None, credentials_path)
+ee.Initialize(credentials)
+
+print("Earth Engine Initialized Successfully")
+
+
+
+
+
+
 
 # Initialize the Flask app
 app = Flask(__name__)
+
+
+# Get the port from the environment variable
+port = int(os.environ.get("PORT", 5000))
+
+
 
 # Define routes
 @app.route('/')
