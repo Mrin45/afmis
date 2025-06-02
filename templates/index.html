@@ -7,11 +7,7 @@
     <title>AFMIS</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-
-    <!-- Load Esri Leaflet from CDN -->
     <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
-
-    <!-- Load Esri Leaflet Vector from CDN -->
     <script src="https://unpkg.com/esri-leaflet-vector@4.2.5/dist/esri-leaflet-vector.js" crossorigin=""></script>
 
     <style>
@@ -26,20 +22,15 @@
             margin: 0;
             height: 100%;
             width: 100%;
-            /* overflow: hidden; */
         }
 
         .footer {
             height: 60px;
             background-color: #11a854;
-            /* Adjust background color as needed */
             color: #fff;
-            /* Adjust text color as needed */
             display: flex;
             align-items: center;
-            /* Center text vertically */
             justify-content: center;
-            /* Center text horizontally */
             position: fixed;
             bottom: 0;
             width: 100%;
@@ -116,6 +107,29 @@
             width: 300px;
         }
 
+        #area-panel {
+            position: absolute;
+            bottom: 1%;
+            left: 10px;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 999;
+            width: 250px;
+            font-family: Arial, sans-serif;
+        }
+
+        #area-panel h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        #area-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
         label {
             font-size: 16px;
             margin-right: 10px;
@@ -182,6 +196,12 @@
         <label>
             <input type="checkbox" id="ndwi-after-checkbox"> NDWI After
         </label>
+        <label>
+            <input type="checkbox" id="esa-worldcover-checkbox"> ESA WorldCover
+        </label>
+        <label>
+            <input type="checkbox" id="esa-water-checkbox"> ESA Water
+        </label>
     </div>
 
     <div id="date-form-container">
@@ -205,25 +225,28 @@
         <button type="submit" id="submit-date">Submit</button>
     </div>
 
-    <div class="footer">
-        <!-- Footer content here -->
-        <h3 class="sub-content" style="text-align: center;color: white !important; font-size: 1.3rem;">&copy; 2024 AFMIS
-             . All
-            rights reserved.</h3>
+    <div id="area-panel">
+        <h3>Area Statistics</h3>
+        <p id="flood-area">Flood Inundation: 0 Ha (0 sqkm)</p>
+        <p id="water-area">Water: 0 Ha (0 sqkm)</p>
+        <p id="esa-water-area">ESA Water: 0 Ha (0 sqkm)</p>
     </div>
 
+    <div class="footer">
+        <h3 class="sub-content" style="text-align: center;color: white !important; font-size: 1.3rem;">© 2024 AFMIS. All rights reserved.</h3>
+    </div>
 
     <script>
         var map = L.map('map').setView([26.244156, 92.537842], 7);
 
         // Add Esri World Imagery basemap
         var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
         });
 
         var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
         // Add Esri labels
@@ -241,24 +264,16 @@
             position: 'bottomright'
         }).addTo(map);
 
-
-
-
-
-
-
         // Fetch district data and populate the dropdown
         fetch('/get-districts')
             .then(response => response.json())
             .then(data => {
                 const dropdown = document.getElementById('district-dropdown');
-                // Add an option for the entire region (ROI)
                 const allOption = document.createElement('option');
                 allOption.value = 'all';
                 allOption.textContent = 'All Districts';
                 dropdown.appendChild(allOption);
 
-                // Add individual district options
                 data.districts.forEach(district => {
                     const option = document.createElement('option');
                     option.value = district;
@@ -267,7 +282,6 @@
                 });
             });
 
-        // Function to fetch flood data and update the map
         // Variable to track all active layers and their associated checkboxes
         let activeLayers = {};
 
@@ -278,7 +292,7 @@
                     map.removeLayer(layer);
                 }
             });
-            activeLayers = {}; // Clear the object
+            activeLayers = {};
         }
 
         // Function to reset checkbox states
@@ -289,6 +303,22 @@
             document.getElementById('water-checkbox').checked = false;
             document.getElementById('ndwi-before-checkbox').checked = false;
             document.getElementById('ndwi-after-checkbox').checked = false;
+            document.getElementById('esa-worldcover-checkbox').checked = false;
+            document.getElementById('esa-water-checkbox').checked = false;
+        }
+
+        // Function to update area display
+        function updateAreaDisplay(data) {
+            const floodHa = (data.flood_area_ha !== undefined && data.flood_area_ha !== null) ? data.flood_area_ha.toFixed(2) : '0.00';
+            const floodSqkm = (data.flood_area_sqkm !== undefined && data.flood_area_sqkm !== null) ? data.flood_area_sqkm.toFixed(2) : '0.00';
+            const waterHa = (data.water_area_ha !== undefined && data.water_area_ha !== null) ? data.water_area_ha.toFixed(2) : '0.00';
+            const waterSqkm = (data.water_area_sqkm !== undefined && data.water_area_sqkm !== null) ? data.water_area_sqkm.toFixed(2) : '0.00';
+            const esaWaterHa = (data.esa_water_area_ha !== undefined && data.esa_water_area_ha !== null) ? data.esa_water_area_ha.toFixed(2) : '0.00';
+            const esaWaterSqkm = (data.esa_water_area_sqkm !== undefined && data.esa_water_area_sqkm !== null) ? data.esa_water_area_sqkm.toFixed(2) : '0.00';
+
+            document.getElementById('flood-area').textContent = `Flood Inundation: ${floodHa} Ha (${floodSqkm} sqkm)`;
+            document.getElementById('water-area').textContent = `Water: ${waterHa} Ha (${waterSqkm} sqkm)`;
+            document.getElementById('esa-water-area').textContent = `ESA Water: ${esaWaterHa} Ha (${esaWaterSqkm} sqkm)`;
         }
 
         // Function to fetch and display flood data
@@ -305,6 +335,11 @@
             // Remove all existing layers and reset checkboxes
             removeAllLayers();
             resetCheckboxes();
+
+            // Reset area display
+            document.getElementById('flood-area').textContent = 'Flood Inundation: 0 Ha (0 sqkm)';
+            document.getElementById('water-area').textContent = 'Water: 0 Ha (0 sqkm)';
+            document.getElementById('esa-water-area').textContent = 'ESA Water: 0 Ha (0 sqkm)';
 
             fetch('/get-flood-data', {
                 method: 'POST',
@@ -329,17 +364,29 @@
                     const floodLayer = L.tileLayer(data.flood_tile_url, { attribution: 'Flood', zIndex: 1000 });
                     const waterLayer = L.tileLayer(data.water_tile_url, { attribution: 'Water', zIndex: 1000 });
                     const beforeFloodNDWI = L.tileLayer(data.ndwi_beforeflood_url, { attribution: 'NDWI Before', zIndex: 1000 });
-                    const aferFloodNDWI = L.tileLayer(data.ndwi_afterflood_url, { attribution: 'NDWI After', zIndex: 1000 });
-                    
+                    const afterFloodNDWI = L.tileLayer(data.ndwi_afterflood_url, { attribution: 'NDWI After', zIndex: 1000 });
+                    const esaWorldCoverLayer = L.tileLayer(data.esa_worldcover_url, { attribution: 'ESA WorldCover', zIndex: 1000 });
+                    const esaWaterLayer = L.tileLayer(data.esa_water_url, { attribution: 'ESA Water', zIndex: 1000 });
+
                     // Store layers in activeLayers
                     activeLayers['beforeFlood'] = beforeFloodLayer;
                     activeLayers['afterFlood'] = afterFloodLayer;
                     activeLayers['flood'] = floodLayer;
                     activeLayers['water'] = waterLayer;
                     activeLayers['ndwiBefore'] = beforeFloodNDWI;
-                    activeLayers['ndwiAfter'] = aferFloodNDWI;
+                    activeLayers['ndwiAfter'] = afterFloodNDWI;
+                    activeLayers['esaWorldCover'] = esaWorldCoverLayer;
+                    activeLayers['esaWater'] = esaWaterLayer;
+
+                    // Update area display
+                    updateAreaDisplay(data);
 
                     // Hide the loading icon
+                    document.getElementById('loading-icon').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    alert('Failed to fetch flood data. Please try again.');
                     document.getElementById('loading-icon').style.display = 'none';
                 });
         }
@@ -381,6 +428,18 @@
             } else {
                 map.removeLayer(activeLayers['ndwiAfter']);
             }
+
+            if (document.getElementById('esa-worldcover-checkbox').checked) {
+                map.addLayer(activeLayers['esaWorldCover']);
+            } else {
+                map.removeLayer(activeLayers['esaWorldCover']);
+            }
+
+            if (document.getElementById('esa-water-checkbox').checked) {
+                map.addLayer(activeLayers['esaWater']);
+            } else {
+                map.removeLayer(activeLayers['esaWater']);
+            }
         }
 
         // Event listeners for checkboxes
@@ -390,11 +449,8 @@
         document.getElementById('water-checkbox').addEventListener('change', updateLayersFromCheckboxes);
         document.getElementById('ndwi-before-checkbox').addEventListener('change', updateLayersFromCheckboxes);
         document.getElementById('ndwi-after-checkbox').addEventListener('change', updateLayersFromCheckboxes);
-
-        // Event listener for the submit button
-        document.getElementById('submit-date').addEventListener('click', fetchFloodData);
-
-
+        document.getElementById('esa-worldcover-checkbox').addEventListener('change', updateLayersFromCheckboxes);
+        document.getElementById('esa-water-checkbox').addEventListener('change', updateLayersFromCheckboxes);
 
         // Show checkboxes after selecting dates
         document.getElementById('show-checkboxes-button').addEventListener('click', function () {
@@ -412,7 +468,6 @@
         document.getElementById('submit-date').addEventListener('click', function () {
             fetchFloodData();
         });
-
     </script>
 </body>
 
